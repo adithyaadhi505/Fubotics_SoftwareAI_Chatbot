@@ -18,11 +18,16 @@ services:
         sync: false
 
   # Frontend Service
-  - type: web
+  - type: static
     name: ai-chatbot-frontend
-    runtime: node
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
+      - key: VITE_API_URL
+        sync: false

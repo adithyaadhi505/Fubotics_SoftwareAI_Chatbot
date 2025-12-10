@@ -13,7 +13,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://ai-chatbot-frontend.onrender.com",
-        "https://*.onrender.com"
+        "https://ai-chatbot-io.onrender.com",
+        "https://fubotics-softwareai-chatbot.onrender.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
