@@ -1,0 +1,266 @@
+================================================================================
+          AI CHAT APP WITH SAVED HISTORY - PROJECT PLAN
+================================================================================
+
+PROJECT OVERVIEW
+-------------------
+A simple web chat application where users can talk to an AI assistant.
+All messages are saved in a database and appear again when you refresh the page.
+
+
+TECHNOLOGY STACK
+-------------------
+
+FRONTEND:
+  - React (JavaScript library for building UI)
+  - Vite (Fast build tool for React)
+  - Axios (Makes HTTP requests to backend)
+  - CSS (For styling the chat interface)
+
+BACKEND:
+  - FastAPI (Python web framework - fast and simple)
+  - Python 3.8+ (Programming language)
+  - Supabase (Cloud database - PostgreSQL)
+  - Google Gemini 2.5 (Primary AI model)
+  - Mistral Medium (Backup AI model if Gemini fails)
+
+
+DATABASE DESIGN
+-------------------
+
+Only ONE simple table needed:
+
+Table Name: messages
+Columns:
+  - id          : Unique identifier (auto-generated UUID)
+  - role        : Who sent the message ('user' or 'assistant')
+  - content     : The actual message text
+  - created_at  : When the message was sent (auto-generated timestamp)
+
+Example data:
+  id: 123abc...    role: user         content: "Hello AI!"           created_at: 2025-12-11 10:30:00
+  id: 456def...    role: assistant    content: "Hi! How can I help?"  created_at: 2025-12-11 10:30:02
+
+
+PROJECT STRUCTURE
+--------------------
+
+Fubotics_SoftwareAI_Chatbot/
+│
+├── backend/                          (Python FastAPI server)
+│   ├── main.py                       (Main server file with API endpoints)
+│   ├── database.py                   (Connects to Supabase database)
+│   ├── ai_service.py                 (Handles AI calls with fallback logic)
+│   ├── requirements.txt              (List of Python packages needed)
+│   └── .env                          (Secret keys - NOT committed to git)
+│
+└── frontend/                         (React application)
+    ├── src/
+    │   ├── App.jsx                   (Main chat interface component)
+    │   ├── App.css                   (Styling for the chat)
+    │   └── main.jsx                  (React entry point)
+    ├── index.html                    (HTML template)
+    ├── package.json                  (Node.js dependencies)
+    └── vite.config.js                (Vite configuration)
+
+
+HOW IT WORKS (Step by Step)
+-------------------------------
+
+STEP 1: User Opens the Page
+  1. React app loads in browser
+  2. Frontend calls: GET /api/messages
+  3. Backend fetches all messages from Supabase database
+  4. Backend returns messages as JSON
+  5. Frontend displays all messages in chat window
+
+STEP 2: User Sends a Message
+  1. User types "Hello AI!" and clicks Send button
+  2. Frontend calls: POST /api/messages with {"content": "Hello AI!"}
+  3. Backend receives the message
+  4. Backend saves user message to Supabase:
+     - role: 'user'
+     - content: 'Hello AI!'
+     - created_at: (automatic)
+  5. Backend calls Google Gemini 2.5 AI with the message
+  6. If Gemini fails → automatically tries Mistral Medium
+  7. AI responds with "Hi! How can I help you today?"
+  8. Backend saves AI response to Supabase:
+     - role: 'assistant'
+     - content: 'Hi! How can I help you today?'
+     - created_at: (automatic)
+  9. Backend returns both messages to frontend
+  10. Frontend displays new messages in chat
+
+STEP 3: User Refreshes Page
+  1. Same as STEP 1
+  2. All previous messages load from database
+  3. Chat history is preserved
+
+
+API ENDPOINTS
+----------------
+
+1. GET /api/messages
+   Purpose: Fetch all chat history
+   Returns: List of all messages from database
+   Example Response:
+   [
+     {"id": "123", "role": "user", "content": "Hello", "created_at": "2025-12-11T10:30:00"},
+     {"id": "124", "role": "assistant", "content": "Hi there!", "created_at": "2025-12-11T10:30:02"}
+   ]
+
+2. POST /api/messages
+   Purpose: Send a new user message
+   Accepts: {"content": "Your message here"}
+   Process:
+     - Save user message
+     - Call AI (Gemini → Mistral fallback)
+     - Save AI response
+     - Return updated messages
+   Returns: New messages or full conversation
+
+
+AI INTEGRATION WITH FALLBACK
+--------------------------------
+
+Primary AI: Google Gemini 2.5
+  - Fast and powerful
+  - Try this first
+
+Fallback AI: Mistral Medium
+  - If Gemini fails (API error, timeout, rate limit)
+  - Automatically switch to Mistral
+  - User doesn't notice the switch
+
+Logic:
+  try:
+    response = call_gemini(message)
+  except error:
+    response = call_mistral(message)  # Automatic fallback
+  
+  return response
+
+
+FRONTEND FEATURES
+--------------------
+
+Chat Interface:
+  - Clean, modern design
+  - Message bubbles (user on right, AI on left)
+  - Scrollable message area
+  - Input box at bottom
+  - Send button
+  - Auto-scroll to latest message
+  - Loading indicator while AI responds
+
+User Experience:
+  - Type message and press Enter or click Send
+  - Messages appear instantly
+  - AI response shows up after 1-2 seconds
+  - Refresh page → all history remains
+
+
+BACKEND FEATURES
+-------------------
+
+FastAPI Server:
+  - Fast Python web framework
+  - Automatic API documentation
+  - Easy to test and debug
+
+Database (Supabase):
+  - Cloud-hosted PostgreSQL
+  - No server setup needed
+  - Automatic backups
+  - Simple to query
+
+AI Service:
+  - Smart fallback system
+  - Error handling
+  - Retry logic
+
+
+ENVIRONMENT VARIABLES (Secrets)
+-----------------------------------
+
+You will need to create a .env file with:
+
+  SUPABASE_URL=your_supabase_project_url
+  SUPABASE_KEY=your_supabase_api_key
+  GOOGLE_API_KEY=your_gemini_api_key
+  MISTRAL_API_KEY=your_mistral_api_key
+
+These keys are:
+  - Secret (never share or commit to git)
+  - Free to get (sign up on respective platforms)
+  - Required for the app to work
+
+
+INSTALLATION REQUIREMENTS
+-----------------------------
+
+What you need on your computer:
+
+1. Node.js (v18 or higher)
+   - For running React frontend
+   - Download from: nodejs.org
+
+2. Python (v3.8 or higher)
+   - For running FastAPI backend
+   - Download from: python.org
+
+3. API Keys (Free sign-ups):
+   - Supabase account → supabase.com
+   - Google AI Studio → ai.google.dev
+   - Mistral AI → console.mistral.ai
+
+
+HOW TO RUN THE PROJECT
+--------------------------
+
+BACKEND (Terminal 1):
+  cd backend
+  pip install -r requirements.txt
+  uvicorn main:app --reload
+  
+  Backend runs on: http://localhost:8000
+
+FRONTEND (Terminal 2):
+  cd frontend
+  npm install
+  npm run dev
+  
+  Frontend runs on: http://localhost:5173
+
+Open browser at http://localhost:5173 to start chatting.
+
+
+KEY FEATURES
+---------------
+
+- Real-time chat with AI
+- All messages saved to database
+- History persists after page refresh
+- Smart AI fallback (Gemini → Mistral)
+- Clean, simple user interface
+- Fast and responsive
+- Easy to understand and modify
+
+
+SUMMARY
+----------
+
+This is a simple but complete AI chat application with:
+  - React frontend for beautiful UI
+  - FastAPI backend for fast API
+  - Supabase for reliable data storage
+  - Two AI models with automatic fallback
+  - Persistent chat history
+
+The architecture is clean, the code is simple, and everything works together
+smoothly to create a great user experience.
+
+================================================================================
+                           END OF PLAN
+================================================================================
